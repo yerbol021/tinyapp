@@ -33,7 +33,7 @@ app.post("/urls", (req, res) => {
   urlDatabase[id] = longURL;
   
   console.log(urlDatabase);  // Log the updated database
-  res.send("Ok");  // Respond with 'Ok' (or potentially something more useful)
+  res.redirect(`/urls/${id}`); // Redirect to the new URL's page
 });
 
 
