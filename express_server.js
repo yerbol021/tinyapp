@@ -14,7 +14,8 @@ app.get("/", (req, res) => {
 });
 
 app.get("/hello", (req, res) => {
-  res.send("<html><body>Hello <b>World</b></body></html>\n");
+  const templateVars = { greeting: "Hello World!" };
+  res.render("hello_world", templateVars);
 });
 
 app.get("/urls.json", (req, res) => {
@@ -26,9 +27,11 @@ app.get("/urls", (req, res) => {
   res.render("urls_index", templateVars);
 });
 
-app.get("/hello", (req, res) => {
-  const templateVars = { greeting: "Hello World!" };
-  res.render("hello_world", templateVars);
+app.get("/urls/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id]; // Assuming urlDatabase is the name of your database
+  const templateVars = { id: id, longURL: longURL };
+  res.render("urls_show", templateVars);
 });
 
 app.listen(PORT, () => {
