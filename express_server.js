@@ -15,6 +15,16 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+app.get("/u/:id", (req, res) => {
+  const id = req.params.id;
+  const longURL = urlDatabase[id];
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send('URL not found');
+  }
+});
+
 function generateRandomString() {
   return Math.random().toString(36).substring(2, 8);
 }
