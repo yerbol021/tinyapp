@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080; // default port 8080
 
+
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -12,7 +13,7 @@ const urlDatabase = {
 app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {   
-  res.send("Hello!");
+  res.send("Hello world!");
 });
 
 app.get("/u/:id", (req, res) => {
@@ -31,8 +32,9 @@ function generateRandomString() {
 
 
 app.get("/hello", (req, res) => {
-  const templateVars = { greeting: "Hello World!" };
-  res.render("hello_world", templateVars);
+  // const templateVars = { greeting: "Hello World!" };
+  // res.render("hello_world", templateVars);
+  res.send("Hello World");
 });
 
 
