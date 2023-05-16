@@ -75,6 +75,20 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
+app.post('/urls/:id', (req, res) => {
+  const id = req.params.id; // Get the ID from the URL
+  const longURL = req.body.longURL; // Get the new long URL from the request body
+
+  // Update the long URL
+  if (urlDatabase[id]) {
+    urlDatabase[id] = longURL;
+    res.redirect('/urls');
+  } else {
+    res.status(404).send('URL not found');
+  }
+});
+
+
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
