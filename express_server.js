@@ -15,15 +15,27 @@ app.get("/", (req, res) => {
   res.send("Hello!");
 });
 
+function generateRandomString() {
+  return Math.random().toString(36).substring(2, 8);
+}
+
+
 app.get("/hello", (req, res) => {
   const templateVars = { greeting: "Hello World!" };
   res.render("hello_world", templateVars);
 });
 
+
 app.post("/urls", (req, res) => {
-  console.log(req.body); // Log the POST request body to the console
-  res.send("Ok"); // Respond with 'Ok' (we will replace this)
+  const longURL = req.body.longURL;
+  const id = generateRandomString();
+
+  urlDatabase[id] = longURL;
+  
+  console.log(urlDatabase);  // Log the updated database
+  res.send("Ok");  // Respond with 'Ok' (or potentially something more useful)
 });
+
 
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
