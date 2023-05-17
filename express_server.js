@@ -11,8 +11,8 @@ const urlDatabase = {
 };
 
 app.post('/login', (req, res) => {
-  const username = req.body.username;
-  res.cookie('username', username);
+  const userName = req.body.userName;
+  res.cookie('userName', userName);
   res.redirect('/urls');
 });
 
