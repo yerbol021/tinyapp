@@ -46,12 +46,17 @@ app.get("/hello", (req, res) => {
 
 app.post("/urls", (req, res) => {
   const longURL = req.body.longURL;
+  const templateVars = {
+    userName: req.cookies ["userName"],
+  };
+
   const id = generateRandomString();
 
   urlDatabase[id] = longURL;
   
   console.log(urlDatabase);  // Log the updated database
   res.redirect(`/urls/${id}`); // Redirect to the new URL's page
+  res.render("urls_index", templateVars);
 });
 
 
@@ -60,7 +65,10 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls", (req, res) => {
-  const templateVars = { urls: urlDatabase };
+  const templateVars = { 
+    urls: urlDatabase,
+    userName: "a@a",
+  };
   res.render("urls_index", templateVars);
 });
 

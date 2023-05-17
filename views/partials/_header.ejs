@@ -21,6 +21,9 @@
     <form action="/login" method="POST">
       <input type="email" placeholder="user@domain.com" name="userName">
       <button type="submit" class="btn btn-primary">Login</button>
+      <% if (userName) { %>
+        <p>Welcome, <%= userName %>!</p>
+      <% } %>
     </form>
   </nav>
 </header>
