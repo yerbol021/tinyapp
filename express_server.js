@@ -12,17 +12,68 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+const users = {
+  userRandomID: {
+    id: "userRandomID",
+    email: "a@a",
+    password: "1111",
+  },
+  user2RandomID: {
+    id: "user2RandomID",
+    email: "s@s",
+    password: "2222",
+  },
+};
+
 app.get('/register', (req, res) => {
   res.render('urls_registration');
 });
 
-app.post('/login', (req, res) => {
-  const userName = req.body.userName;
-  res.cookie('userName', userName);
+app.post('/register', (req, res) => {
+  const email = req.body.email;
+  const password = req.body.password;
+  function generateRandomString() {
+    return Math.random().toString(36).substring(2, 8);
+  }
+  const userId = generateRandomString();
+  
+  const newUser = {
+    id: userId,
+    email,
+    password
+  };
+  
+  users[userId] = newUser;
+  
+  res.cookie('user_id', userId);
+  // console.log('userId', userId);
   res.redirect('/urls');
 });
 
+function findUserByEmail (email, database) {
+  for (let user in database){
+    if(email === database[user]["email"]) {
+      return database[user];
+    }
+  }
+  return null;
+};
+
+app.post('/login', (req, res) => {
+  const { email, password } = req.body;
+  const user = findUserByEmail(email, users);
+
+  if (user && user.password === password) {
+    res.cookie('user_id', user.id);
+    res.redirect('/urls');
+  } else {
+    res.status(401).send('Invalid email or password');
+  }
+});
+
+
 app.post('/logout', (req, res) => {
+  res.clearCookie('user_id');
   res.clearCookie('userName');
   res.redirect('/urls');
 });
@@ -54,21 +105,16 @@ app.get("/hello", (req, res) => {
   res.send("Hello World");
 });
 
-
-app.post("/urls", (req, res) => {
-  const longURL = req.body.longURL;
+app.get('/urls', (req, res) => {
+  const userId = req.cookies.user_id;
+  const user = users[userId];
   const templateVars = {
-    userName: req.cookies["userName"],
+    urls: urlDatabase,
+    user: user
   };
-
-  const id = generateRandomString();
-
-  urlDatabase[id] = longURL;
-  
-  console.log(urlDatabase);  // Log the updated database
-  res.redirect(`/urls/${id}`); // Redirect to the new URL's page
-  res.render("urls_index", templateVars);
+  res.render('urls_index', templateVars);
 });
+
 
 
 app.get("/urls.json", (req, res) => {

@@ -11,21 +11,19 @@
         <a class="nav-item nav-link" href="/urls/new">Create New URL</a>
       </div>
     </div>
-    git checkout -b feature/user-registration
-
-      <% if (userName) { %>
-        <!-- Display userName and logout form -->
-        <p>Welcome, <%= userName %>!</p>
-        <form action="/logout" method="POST">
-          <button type="submit" class="btn btn-primary">Logout</button>
-        </form>
-        <% } else { %>
-          <!-- Display login form -->
-          <form action="/login" method="POST">
-            <input type="email" placeholder="user@domain.com" name="userName">
-            <button type="submit" class="btn btn-primary">Login</button>
-          </form>
-          <% } %>
+    <% if (user) { %>
+      <!-- Display user email and logout form -->
+      <p>Welcome, <%= user.email %>!</p>
+      <form action="/logout" method="POST">
+        <button type="submit" class="btn btn-primary">Logout</button>
+      </form>
+    <% } else { %>
+      <!-- Display login form -->
+      <form action="/login" method="POST">
+        <input type="email" placeholder="user@domain.com" name="email">
+        <input type="password" placeholder="password" name="password">
+        <button type="submit" class="btn btn-primary">Login</button>
+      </form>
+    <% } %>
   </nav>
 </header>
- 
