@@ -12,6 +12,10 @@ const urlDatabase = {
   "9sm5xK": "http://www.google.com"
 };
 
+app.get('/register', (req, res) => {
+  res.render('urls_registration');
+});
+
 app.post('/login', (req, res) => {
   const userName = req.body.userName;
   res.cookie('userName', userName);
