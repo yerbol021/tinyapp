@@ -79,7 +79,7 @@ app.post('/login', (req, res) => {
     res.cookie('user_id', user.id);
     res.redirect('/urls');
   } else {
-    res.status(401).send('Invalid email or password');
+    res.status(403).send('Invalid email or password');
   }
 });
 
@@ -88,10 +88,9 @@ app.get('/login', (req, res) => {
   res.render('urls_loginForm');
 });
 
-
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id');
-  res.redirect('/urls');
+  res.clearCookie('user_id'); // Clear the user_id cookie
+  res.redirect('/login');
 });
 
 app.use(express.urlencoded({ extended: true }));
@@ -142,7 +141,7 @@ app.get("/urls/new", (req, res) => {
     urls: urlDatabase,
     user: user
   };
-  res.render("urls_new",templateVars);
+  res.render("urls_new", templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
