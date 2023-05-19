@@ -23,12 +23,12 @@ const users = {
   abc: {
     id: "abc",
     email: "a@a",
-    password: "1111",
+    password: bcrypt.hashSync("1111", 10),
   },
   def: {
     id: "def",
     email: "s@s",
-    password: "1111",
+    password: bcrypt.hashSync("1111", 10),
   },
 };
 
@@ -71,7 +71,6 @@ app.post('/register', (req, res) => {
   }
 
   const userId = generateRandomString();
-
   const hashedPassword = bcrypt.hashSync(password, 10);
 
   const newUser = {
@@ -99,7 +98,7 @@ app.post('/login', (req, res) => {
   const { email, password } = req.body;
   const user = findUserByEmail(email, users);
 
-  if (user && user.password === password) {
+  if (user && bcrypt.compareSync(password, user.password)) {
     res.cookie('user_id', user.id);
     res.redirect('/urls');
   } else {
