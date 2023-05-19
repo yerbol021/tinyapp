@@ -18,12 +18,9 @@
         <button type="submit" class="btn btn-primary">Logout</button>
       </form>
     <% } else { %>
-      <!-- Display login form -->
-      <form action="/login" method="POST">
-        <input type="email" placeholder="user@domain.com" name="email">
-        <input type="password" placeholder="password" name="password">
-        <button type="submit" class="btn btn-primary">Login</button>
-      </form>
+      <!-- Display register and login links -->
+      <a class="nav-item nav-link" href="/register">Register</a>
+      <a class="nav-item nav-link" href="/login">Login</a>
     <% } %>
   </nav>
 </header>
