@@ -3,6 +3,7 @@ const app = express();
 const PORT = 8080;
 const cookieSession = require('cookie-session');
 const bcrypt = require("bcryptjs");
+const { getUserByEmail } = require('./helpers');
 
 app.use(cookieSession({
   name: 'session',
@@ -70,7 +71,7 @@ app.post('/register', (req, res) => {
     return;
   }
 
-  const existingUser = findUserByEmail(email, users);
+  const existingUser = getUserByEmail(email, users);
   if (existingUser) {
     res.status(400).send('Email already exists');
     return;
@@ -92,18 +93,10 @@ app.post('/register', (req, res) => {
   res.redirect('/urls');
 });
 
-function findUserByEmail(email, database) {
-  for (let user in database) {
-    if (email === database[user]["email"]) {
-      return database[user];
-    }
-  }
-  return null;
-};
 
 app.post('/login', (req, res) => {
   const { email, password } = req.body;
-  const user = findUserByEmail(email, users);
+  const user = getUserByEmail(email, users);
 
   if (user && bcrypt.compareSync(password, user.password)) {
     req.session.user_id = user.id;
@@ -127,8 +120,6 @@ app.post('/logout', (req, res) => {
   req.session = null;
   res.redirect('/login');
 });
-
-app.use(express.urlencoded({ extended: true }));
 
 app.get("/", (req, res) => {
   res.send("Hello world!");
