@@ -84,6 +84,11 @@ app.post('/login', (req, res) => {
 });
 
 
+app.get('/login', (req, res) => {
+  res.render('urls_loginForm');
+});
+
+
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
   res.redirect('/urls');
