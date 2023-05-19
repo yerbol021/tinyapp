@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const PORT = 8080; // default port 8080
+const PORT = 8080;
 const cookieParser = require('cookie-parser');
 
 app.use(cookieParser());
@@ -8,8 +8,14 @@ app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
-  "b2xVn2": "http://www.lighthouselabs.ca",
-  "9sm5xK": "http://www.google.com"
+  "b2xVn2": {
+    longURL: "http://www.lighthouselabs.ca",
+    userID: "abc",
+  },
+  "9sm5xK": {
+    longURL: "http://www.google.com",
+    userID: "def",
+  }
 };
 
 const users = {
@@ -21,12 +27,22 @@ const users = {
   def: {
     id: "def",
     email: "s@s",
-    password: "2222",
+    password: "1111",
   },
 };
 
 function generateRandomString() {
   return Math.random().toString(36).substring(2, 8);
+}
+
+function urlsForUser(id) {
+  const userURLs = {};
+  for (const shortURL in urlDatabase) {
+    if (urlDatabase[shortURL].userID === id) {
+      userURLs[shortURL] = urlDatabase[shortURL];
+    }
+  }
+  return userURLs;
 }
 
 app.get('/register', (req, res) => {
@@ -99,7 +115,7 @@ app.get('/login', (req, res) => {
 });
 
 app.post('/logout', (req, res) => {
-  res.clearCookie('user_id'); // Clear the user_id cookie
+  res.clearCookie('user_id'); 
   res.redirect('/login');
 });
 
@@ -109,35 +125,19 @@ app.get("/", (req, res) => {
   res.send("Hello world!");
 });
 
-app.get("/u/:id", (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[id];
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
-    res.status(404).send('URL not found');
-  }
-});
-
-function generateRandomString() {
-  return Math.random().toString(36).substring(2, 8);
-}
-
-
-app.get("/hello", (req, res) => {
-  // const templateVars = { greeting: "Hello World!" };
-  // res.render("hello_world", templateVars);
-  res.send("Hello World");
-});
-
-app.get('/urls', (req, res) => {
+app.get("/urls", (req, res) => {
   const userId = req.cookies.user_id;
   const user = users[userId];
-  const templateVars = {
-    urls: urlDatabase,
-    user: user
-  };
-  res.render('urls_index', templateVars);
+  if (!userId || !user) {
+    res.status(401).send('Please login or register to view your URLs');
+  } else {
+    const userURLs = urlsForUser(userId);
+    const templateVars = {
+      urls: userURLs,
+      user: user
+    };
+    res.render('urls_index', templateVars);
+  }
 });
 
 app.get("/urls.json", (req, res) => {
@@ -157,50 +157,92 @@ app.get("/urls/new", (req, res) => {
   }
 });
 
-
 app.post("/urls", (req, res) => {
   const userId = req.cookies.user_id;
   if (!userId || !users[userId]) {
     res.status(401).send("You need to be logged in to create new URLs.");
   } else {
     const longURL = req.body.longURL;
-    const shortURL = "/u/" + generateRandomString();
-    urlDatabase[shortURL] = longURL;
+    const shortURL = generateRandomString();
+    urlDatabase[shortURL] = {
+      longURL: longURL,
+      userID: userId
+    };
     res.redirect("/urls");
   }
 });
 
-
 app.get("/urls/:id", (req, res) => {
-  const id = req.params.id;
-  const longURL = urlDatabase[id];
-  if (longURL) {
-    res.redirect(longURL);
-  } else {
-    res.status(404).send('<h1>URL not found</h1>');
+  const userId = req.cookies.user_id;
+  if (!userId || !users[userId]) {
+    res.status(401).send("Please login or register to view this URL");
+    return;
   }
+
+  const id = req.params.id;
+  const url = urlDatabase[id];
+
+  if (!url) {
+    res.status(404).send('URL not found');
+    return;
+  }
+
+  if (url.userID !== userId) {
+    res.status(403).send('You do not own this URL');
+    return;
+  }
+
+  res.redirect(url.longURL);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
+  const userId = req.cookies.user_id;
+  if (!userId || !users[userId]) {
+    res.status(401).send("Please login or register to delete this URL");
+    return;
+  }
+
   const id = req.params.id;
+  const url = urlDatabase[id];
+
+  if (!url) {
+    res.status(404).send('URL not found');
+    return;
+  }
+
+  if (url.userID !== userId) {
+    res.status(403).send('You do not own this URL');
+    return;
+  }
+
   delete urlDatabase[id];
   res.redirect('/urls');
 });
 
 app.post('/urls/:id', (req, res) => {
-  const id = req.params.id; // Get the ID from the URL
-  const longURL = req.body.longURL; // Get the new long URL from the request body
-
-  // Update the long URL
-  if (urlDatabase[id]) {
-    urlDatabase[id] = longURL;
-    res.redirect('/urls');
-  } else {
-    res.status(404).send('URL not found');
+  const userId = req.cookies.user_id;
+  if (!userId || !users[userId]) {
+    res.status(401).send("Please login or register to update this URL");
+    return;
   }
+
+  const id = req.params.id;
+  const url = urlDatabase[id];
+
+  if (!url) {
+    res.status(404).send('URL not found');
+    return;
+  }
+
+  if (url.userID !== userId) {
+    res.status(403).send('You do not own this URL');
+    return;
+  }
+
+  const longURL = req.body.longURL;
+  urlDatabase[id].longURL = longURL;
+  res.redirect('/urls');
 });
-
-
 
 app.listen(PORT, () => {
   console.log(`Example app listening on port ${PORT}!`);
