@@ -147,12 +147,16 @@ app.get("/urls.json", (req, res) => {
 app.get("/urls/new", (req, res) => {
   const userId = req.cookies.user_id;
   const user = users[userId];
-  if (!userId || !users[userId]) {
+  if (!userId || !user) {
     res.redirect("/login");
   } else {
-    res.render("urls_new");
+    const templateVars = {
+      user: user
+    };
+    res.render("urls_new", templateVars);
   }
 });
+
 
 app.post("/urls", (req, res) => {
   const userId = req.cookies.user_id;
@@ -160,7 +164,7 @@ app.post("/urls", (req, res) => {
     res.status(401).send("You need to be logged in to create new URLs.");
   } else {
     const longURL = req.body.longURL;
-    const shortURL = "/u/" + generateRandomString(); 
+    const shortURL = "/u/" + generateRandomString();
     urlDatabase[shortURL] = longURL;
     res.redirect("/urls");
   }
@@ -169,9 +173,12 @@ app.post("/urls", (req, res) => {
 
 app.get("/urls/:id", (req, res) => {
   const id = req.params.id;
-  const longURL = urlDatabase[id]; 
-  const templateVars = { id: id, longURL: longURL };
-  res.render("urls_show", templateVars);
+  const longURL = urlDatabase[id];
+  if (longURL) {
+    res.redirect(longURL);
+  } else {
+    res.status(404).send('<h1>URL not found</h1>');
+  }
 });
 
 app.post('/urls/:id/delete', (req, res) => {
