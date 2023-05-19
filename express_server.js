@@ -2,6 +2,7 @@ const express = require("express");
 const app = express();
 const PORT = 8080;
 const cookieParser = require('cookie-parser');
+const bcrypt = require("bcryptjs");
 
 app.use(cookieParser());
 app.use(express.urlencoded({ extended: false }));
@@ -71,10 +72,12 @@ app.post('/register', (req, res) => {
 
   const userId = generateRandomString();
 
+  const hashedPassword = bcrypt.hashSync(password, 10);
+
   const newUser = {
     id: userId,
     email,
-    password
+    password: hashedPassword
   };
 
   users[userId] = newUser;
