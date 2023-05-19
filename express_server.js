@@ -4,7 +4,7 @@ const PORT = 8080; // default port 8080
 const cookieParser = require('cookie-parser');
 
 app.use(cookieParser());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.urlencoded({ extended: false }));
 app.set("view engine", "ejs");
 
 const urlDatabase = {
@@ -13,17 +13,21 @@ const urlDatabase = {
 };
 
 const users = {
-  userRandomID: {
-    id: "userRandomID",
+  abc: {
+    id: "abc",
     email: "a@a",
     password: "1111",
   },
-  user2RandomID: {
-    id: "user2RandomID",
+  def: {
+    id: "def",
     email: "s@s",
     password: "2222",
   },
 };
+
+function generateRandomString() {
+  return Math.random().toString(36).substring(2, 8);
+}
 
 app.get('/register', (req, res) => {
   res.render('urls_registration');
@@ -32,27 +36,35 @@ app.get('/register', (req, res) => {
 app.post('/register', (req, res) => {
   const email = req.body.email;
   const password = req.body.password;
-  function generateRandomString() {
-    return Math.random().toString(36).substring(2, 8);
+
+  if (!email || !password) {
+    res.status(400).send('email or password not found');
+    return;
   }
+
+  const existingUser = findUserByEmail(email, users);
+  if (existingUser) {
+    res.status(400).send('Email already exists');
+    return;
+  }
+
   const userId = generateRandomString();
-  
+
   const newUser = {
     id: userId,
     email,
     password
   };
-  
+
   users[userId] = newUser;
-  
+
   res.cookie('user_id', userId);
-  // console.log('userId', userId);
   res.redirect('/urls');
 });
 
-function findUserByEmail (email, database) {
-  for (let user in database){
-    if(email === database[user]["email"]) {
+function findUserByEmail(email, database) {
+  for (let user in database) {
+    if (email === database[user]["email"]) {
       return database[user];
     }
   }
@@ -74,13 +86,12 @@ app.post('/login', (req, res) => {
 
 app.post('/logout', (req, res) => {
   res.clearCookie('user_id');
-  res.clearCookie('userName');
   res.redirect('/urls');
 });
 
 app.use(express.urlencoded({ extended: true }));
 
-app.get("/", (req, res) => {   
+app.get("/", (req, res) => {
   res.send("Hello world!");
 });
 
@@ -115,20 +126,8 @@ app.get('/urls', (req, res) => {
   res.render('urls_index', templateVars);
 });
 
-
-
 app.get("/urls.json", (req, res) => {
   res.json(urlDatabase);
-});
-
-app.get("/urls", (req, res) => {
-  console.log('cookies');
-  console.log(req.cookies);
-  const templateVars = { 
-    urls: urlDatabase,
-    userName: req.cookies["userName"],
-  };
-  res.render("urls_index", templateVars);
 });
 
 app.get("/urls/new", (req, res) => {
