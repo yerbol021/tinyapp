@@ -131,7 +131,13 @@ app.get("/urls.json", (req, res) => {
 });
 
 app.get("/urls/new", (req, res) => {
-  res.render("urls_new");
+  const userId = req.cookies.user_id;
+  const user = users[userId];
+  const templateVars = {
+    urls: urlDatabase,
+    user: user
+  };
+  res.render("urls_new",templateVars);
 });
 
 app.get("/urls/:id", (req, res) => {
