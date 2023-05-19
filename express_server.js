@@ -30,7 +30,12 @@ function generateRandomString() {
 }
 
 app.get('/register', (req, res) => {
-  res.render('urls_registration');
+  const userId = req.cookies.user_id;
+  if (userId && users[userId]) {
+    res.redirect('/urls');
+  } else {
+    res.render('urls_registration');
+  }
 });
 
 app.post('/register', (req, res) => {
@@ -85,7 +90,12 @@ app.post('/login', (req, res) => {
 
 
 app.get('/login', (req, res) => {
-  res.render('urls_loginForm');
+  const userId = req.cookies.user_id;
+  if (userId && users[userId]) {
+    res.redirect('/urls');
+  } else {
+    res.render('urls_loginForm');
+  }
 });
 
 app.post('/logout', (req, res) => {
