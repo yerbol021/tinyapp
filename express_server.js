@@ -30,12 +30,14 @@ const users = {
   abc: {
     id: "abc",
     email: "a@a",
-    password: "11",
+    password: "$2a$10$E6EpFm41UqMPfAHV8L0jXuurl4EWIkRcV9UwCjddKU.oySdj6kQT2",
+  // deffault password is 11
   },
   def: {
     id: "def",
     email: "s@s",
-    password: "11",
+    password: "$2a$10$E6EpFm41UqMPfAHV8L0jXuurl4EWIkRcV9UwCjddKU.oySdj6kQT2",
+  // deffault password is 11
   },
 };
 
@@ -58,7 +60,10 @@ app.get('/register', (req, res) => {
   if (userId && users[userId]) {
     res.redirect('/urls');
   } else {
-    res.render('urls_registration');
+    const templateVars ={
+      user: null,
+    }
+    res.render('urls_registration', templateVars);
   }
 });
 
@@ -112,7 +117,10 @@ app.get('/login', (req, res) => {
   if (userId && users[userId]) {
     res.redirect('/urls');
   } else {
-    res.render('urls_loginForm');
+    const templateVars = {
+        user: null
+    }
+    res.render('urls_loginForm', templateVars);
   }
 });
 
@@ -191,8 +199,12 @@ app.get("/urls/:id", (req, res) => {
     res.status(403).send('You do not own this URL');
     return;
   }
-
-  res.redirect(url.longURL);
+    const templateVars = {
+      user: users[userId],
+      longURL: url.longURL,
+      id: id,
+    }
+  res.render('urls_show', templateVars);
 });
 
 app.post('/urls/:id/delete', (req, res) => {
@@ -219,7 +231,19 @@ app.post('/urls/:id/delete', (req, res) => {
   res.redirect('/urls');
 });
 
-app.post('/urls/:id', (req, res) => {
+app.get('/u/:id', (req,res) =>{
+  const id = req.params.id;
+  const url = urlDatabase[id];
+
+  if (!url) {
+    res.status(404).send('URL not found');
+    return;
+  }
+  url.longURL;
+  res.redirect(url.longURL);
+})
+
+app.post('/urls/:id/edit', (req, res) => {
   const userId = req.session.user_id;
   if (!userId || !users[userId]) {
     res.status(401).send("Please login or register to update this URL");
@@ -239,7 +263,7 @@ app.post('/urls/:id', (req, res) => {
     return;
   }
 
-  const longURL = req.body.longURL;
+  const longURL = req.body.updatedLongUrl;
   urlDatabase[id].longURL = longURL;
   res.redirect('/urls');
 });
